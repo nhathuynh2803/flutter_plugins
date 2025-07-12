@@ -1,13 +1,13 @@
 #
 # To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html.
-# Run `pod lib lint secure_storage_helper.podspec` to validate before publishing.
+# Run `pod lib lint flutter_plugins.podspec` to validate before publishing.
 #
 Pod::Spec.new do |s|
-  s.name             = 'secure_storage_helper'
+  s.name             = 'flutter_plugins'
   s.version          = '0.0.1'
-  s.summary          = 'A new Flutter plugin project.'
+  s.summary          = 'A comprehensive Flutter plugin collection with modular features.'
   s.description      = <<-DESC
-A new Flutter plugin project.
+A comprehensive Flutter plugin collection with modular features: secure storage, camera, contacts, and quick actions.
                        DESC
   s.homepage         = 'http://example.com'
   s.license          = { :file => '../LICENSE' }

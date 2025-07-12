@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:secure_storage_helper/features/secure_storage/secure_storage_helper.dart';
+import 'package:flutter_plugins/features/secure_storage/secure_storage_helper.dart';
 
 class SecureStorageDemo extends StatefulWidget {
   const SecureStorageDemo({super.key});

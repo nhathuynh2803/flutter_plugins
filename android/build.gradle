@@ -1,4 +1,4 @@
-group = "com.example.secure_storage_helper"
+group = "com.example.flutter_plugins"
 version = "1.0-SNAPSHOT"
 
 buildscript {

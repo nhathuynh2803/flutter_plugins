@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:secure_storage_helper/features/camera/camera_helper.dart';
+import 'package:flutter_plugins/features/camera/camera_helper.dart';
 import 'dart:io';
 
 class CameraDemo extends StatefulWidget {

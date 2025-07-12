@@ -1,5 +1,5 @@
-name: secure_storage_helper_example
-description: "Demonstrates how to use the secure_storage_helper plugin."
+name: flutter_plugins_example
+description: "Demonstrates how to use the flutter_plugins collection - secure storage, camera, contacts, and quick actions."
 version: 0.0.1+1
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -18,9 +18,9 @@ dependencies:
   flutter:
     sdk: flutter
 
-  secure_storage_helper:
+  flutter_plugins:
     # When depending on this package from a real application you should use:
-    #   secure_storage_helper: ^x.y.z
+    #   flutter_plugins: ^x.y.z
     # See https://dart.dev/tools/pub/dependencies#version-constraints
     # The example app is bundled with the plugin so we use a path dependency on
     # the parent directory to use the current plugin's version.

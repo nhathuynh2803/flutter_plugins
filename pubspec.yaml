@@ -1,7 +1,7 @@
-name: secure_storage_helper
-description: "A new Flutter plugin project."
+name: flutter_plugins
+description: "A comprehensive Flutter plugin collection with modular features: secure storage, camera, contacts, and quick actions."
 version: 0.0.1
-homepage:
+homepage: https://github.com/nhathuynh2803/flutter_plugins
 
 environment:
   sdk: ^3.8.1

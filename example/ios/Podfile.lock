@@ -1,27 +1,27 @@
 PODS:
   - Flutter (1.0.0)
-  - integration_test (0.0.1):
+  - flutter_plugins (0.0.1):
     - Flutter
-  - secure_storage_helper (0.0.1):
+  - integration_test (0.0.1):
     - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
+  - flutter_plugins (from `.symlinks/plugins/flutter_plugins/ios`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
-  - secure_storage_helper (from `.symlinks/plugins/secure_storage_helper/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
+  flutter_plugins:
+    :path: ".symlinks/plugins/flutter_plugins/ios"
   integration_test:
     :path: ".symlinks/plugins/integration_test/ios"
-  secure_storage_helper:
-    :path: ".symlinks/plugins/secure_storage_helper/ios"
 
 SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  flutter_plugins: 1b65dd497d2051b6ac400b15dedfd8495873a29f
   integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
-  secure_storage_helper: 535f6419b8858ea7c8d6e40cb5b7077cac0b661f
 
 PODFILE CHECKSUM: 4305caec6b40dde0ae97be1573c53de1882a07e5
 

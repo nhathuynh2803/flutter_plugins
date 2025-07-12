@@ -21,7 +21,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:secure_storage_helper/features.dart';
+import 'package:flutter_plugins/features.dart';
 import 'features/secure_storage_demo.dart';
 import 'features/camera_demo.dart';
 import 'features/contacts_demo.dart';

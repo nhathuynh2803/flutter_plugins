@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:secure_storage_helper/features/quick_actions/quick_actions_helper.dart';
+import 'package:flutter_plugins/features/quick_actions/quick_actions_helper.dart';
 import 'dart:async';
 
 class QuickActionsDemo extends StatefulWidget {

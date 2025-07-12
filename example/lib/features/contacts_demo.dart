@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:secure_storage_helper/features/contacts/contacts_helper.dart';
+import 'package:flutter_plugins/features/contacts/contacts_helper.dart';
 
 class ContactsDemo extends StatefulWidget {
   const ContactsDemo({super.key});
