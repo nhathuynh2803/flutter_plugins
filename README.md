@@ -1,4 +1,4 @@
-# secure_storage_helper
+# sample plugins flutter for flutter app
 
 A new Flutter plugin project.
 
