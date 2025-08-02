@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_plugins/features/camera/camera_helper.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/camera_provider.dart';
 import 'dart:io';
 
-class CameraDemo extends StatefulWidget {
+class CameraDemo extends ConsumerWidget {
   const CameraDemo({super.key});
 
   @override
-  State<CameraDemo> createState() => _CameraDemoState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cameraState = ref.watch(cameraProvider);
+    final cameraNotifier = ref.read(cameraProvider.notifier);
 
-class _CameraDemoState extends State<CameraDemo> {
-  final _camera = CameraHelper();
-  String _result = '';
-  String? _imagePath;
+    // Listen for errors and show snackbar
+    ref.listen<CameraState>(cameraProvider, (previous, next) {
+      if (next.error != null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(next.error!)));
+        cameraNotifier.clearError();
+      }
+    });
 
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Camera Demo'),
@@ -31,15 +35,25 @@ class _CameraDemoState extends State<CameraDemo> {
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: _takePicture,
-                    icon: const Icon(Icons.camera_alt),
+                    onPressed: cameraState.isLoading
+                        ? null
+                        : () => cameraNotifier.takePicture(),
+                    icon: cameraState.isLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.camera_alt),
                     label: const Text('Take Picture'),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: _pickFromGallery,
+                    onPressed: cameraState.isLoading
+                        ? null
+                        : () => cameraNotifier.pickFromGallery(),
                     icon: const Icon(Icons.photo_library),
                     label: const Text('Pick from Gallery'),
                   ),
@@ -48,7 +62,9 @@ class _CameraDemoState extends State<CameraDemo> {
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: _checkCameraAvailability,
+              onPressed: cameraState.isLoading
+                  ? null
+                  : () => cameraNotifier.checkCameraAvailability(),
               icon: const Icon(Icons.info),
               label: const Text('Check Camera Availability'),
             ),
@@ -62,12 +78,14 @@ class _CameraDemoState extends State<CameraDemo> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                _result.isEmpty ? 'No result yet' : _result,
+                cameraState.result.isEmpty
+                    ? 'No result yet'
+                    : cameraState.result,
                 style: const TextStyle(fontFamily: 'monospace'),
               ),
             ),
             const SizedBox(height: 20),
-            if (_imagePath != null) ...[
+            if (cameraState.imagePath != null) ...[
               Text(
                 'Selected Image:',
                 style: Theme.of(context).textTheme.titleMedium,
@@ -82,7 +100,7 @@ class _CameraDemoState extends State<CameraDemo> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.file(
-                      File(_imagePath!),
+                      File(cameraState.imagePath!),
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) {
                         return const Center(child: Text('Error loading image'));
@@ -96,54 +114,5 @@ class _CameraDemoState extends State<CameraDemo> {
         ),
       ),
     );
-  }
-
-  Future<void> _takePicture() async {
-    try {
-      final imagePath = await _camera.takePicture();
-      setState(() {
-        _imagePath = imagePath;
-        _result = imagePath != null
-            ? 'Picture taken successfully: $imagePath'
-            : 'Failed to take picture';
-      });
-    } on PlatformException catch (e) {
-      setState(() {
-        _result = 'Failed to take picture: ${e.message}';
-        _imagePath = null;
-      });
-    }
-  }
-
-  Future<void> _pickFromGallery() async {
-    try {
-      final imagePath = await _camera.pickImageFromGallery();
-      setState(() {
-        _imagePath = imagePath;
-        _result = imagePath != null
-            ? 'Image picked successfully: $imagePath'
-            : 'Failed to pick image';
-      });
-    } on PlatformException catch (e) {
-      setState(() {
-        _result = 'Failed to pick image: ${e.message}';
-        _imagePath = null;
-      });
-    }
-  }
-
-  Future<void> _checkCameraAvailability() async {
-    try {
-      final hasCamera = await _camera.hasCamera();
-      setState(() {
-        _result = hasCamera
-            ? 'Camera is available on this device'
-            : 'No camera available on this device';
-      });
-    } on PlatformException catch (e) {
-      setState(() {
-        _result = 'Failed to check camera: ${e.message}';
-      });
-    }
   }
 }

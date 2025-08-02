@@ -7,9 +7,9 @@
 // https://flutter.dev/to/integration-testing
 
 
+import 'package:flutter_plugins/features/secure_storage/secure_storage_helper.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:secure_storage_helper/features/secure_storage/secure_storage_helper.dart';
 
 
 void main() {

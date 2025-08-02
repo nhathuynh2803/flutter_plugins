@@ -21,11 +21,12 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:flutter_plugins/features.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'features/secure_storage_demo.dart';
 import 'features/camera_demo.dart';
 import 'features/contacts_demo.dart';
 import 'features/quick_actions_demo.dart';
+import 'providers/main_providers.dart';
 
 // ==========================================
 // Global Navigation Key
@@ -34,30 +35,26 @@ import 'features/quick_actions_demo.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  ConsumerState<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends ConsumerState<MyApp> {
   // ==========================================
   // State Variables
   // ==========================================
 
-  String _platformVersion = 'Unknown';
-  final _secureStorageHelperPlugin = SecureStorageHelper();
-  final _quickActions = QuickActionsHelper();
   StreamSubscription<String>? _shortcutSubscription;
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
     _setupQuickActions(); // Set up default shortcuts
     _initShortcutListener();
   }
@@ -70,7 +67,8 @@ class _MyAppState extends State<MyApp> {
   /// This listener handles shortcuts from anywhere in the app
   void _initShortcutListener() {
     print('Main: Initializing shortcut listener...'); // Debug log
-    _shortcutSubscription = _quickActions.shortcutStream.listen(
+    final quickActionsStream = ref.read(quickActionsStreamProvider.stream);
+    _shortcutSubscription = quickActionsStream.listen(
       (shortcutType) {
         print('Main: Received shortcut action: $shortcutType'); // Debug log
         _handleShortcutAction(shortcutType);
@@ -88,13 +86,7 @@ class _MyAppState extends State<MyApp> {
   /// These shortcuts will be shown when the user long-presses the app icon
   /// They can be customized based on your app's features
   void _setupQuickActions() async {
-    final shortcuts = [
-      {'type': 'camera', 'title': 'Take Photo', 'icon': 'capture_photo'},
-      {'type': 'contacts', 'title': 'View Contacts', 'icon': 'contact'},
-      {'type': 'storage', 'title': 'Secure Storage', 'icon': 'bookmark'},
-    ];
-
-    await _quickActions.setShortcutItems(shortcuts);
+    ref.read(setupShortcutsProvider);
   }
 
   // ==========================================
@@ -182,30 +174,7 @@ class _MyAppState extends State<MyApp> {
   // ==========================================
   // Platform Initialization
   // ==========================================
-
-  /// Initialize platform-specific features and get platform version
-  /// Platform messages are asynchronous, so we initialize in an async method
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException
-    // We also handle the message potentially returning null
-    try {
-      platformVersion =
-          await _secureStorageHelperPlugin.getPlatformVersion() ??
-          'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
-  }
+  // Platform version is now handled by Riverpod provider
 
   // ==========================================
   // Lifecycle Management
@@ -229,7 +198,7 @@ class _MyAppState extends State<MyApp> {
       title: 'Multi-Feature Plugin Demo',
       theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
       navigatorKey: navigatorKey, // Required for shortcut navigation
-      home: HomePage(platformVersion: _platformVersion),
+      home: const HomePage(),
     );
   }
 }
@@ -238,13 +207,13 @@ class _MyAppState extends State<MyApp> {
 // Home Page Widget
 // ==========================================
 /// Main home page with navigation to all plugin features
-class HomePage extends StatelessWidget {
-  final String platformVersion;
-
-  const HomePage({super.key, required this.platformVersion});
+class HomePage extends ConsumerWidget {
+  const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final platformVersionAsync = ref.watch(platformVersionProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Multi-Feature Plugin Demo'),
@@ -270,10 +239,18 @@ class HomePage extends StatelessWidget {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      'Running on: $platformVersion',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
+                    platformVersionAsync.when(
+                      data: (platformVersion) => Text(
+                        'Running on: $platformVersion',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      loading: () => const CircularProgressIndicator(),
+                      error: (error, stackTrace) => Text(
+                        'Error: $error',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ],
                 ),

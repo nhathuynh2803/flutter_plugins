@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_plugins/features/contacts/contacts_helper.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/contacts_provider.dart';
 
-class ContactsDemo extends StatefulWidget {
+class ContactsDemo extends ConsumerWidget {
   const ContactsDemo({super.key});
 
   @override
-  State<ContactsDemo> createState() => _ContactsDemoState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final contactsState = ref.watch(contactsProvider);
+    final contactsNotifier = ref.read(contactsProvider.notifier);
 
-class _ContactsDemoState extends State<ContactsDemo> {
-  final _contacts = ContactsHelper();
-  String _result = '';
-  List<Map<String, dynamic>> _contactsList = [];
-  bool _isLoading = false;
+    // Listen for errors and show snackbar
+    ref.listen<ContactsState>(contactsProvider, (previous, next) {
+      if (next.error != null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(next.error!)));
+        contactsNotifier.clearError();
+      }
+    });
 
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Contacts Demo'),
@@ -32,7 +35,9 @@ class _ContactsDemoState extends State<ContactsDemo> {
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: _checkPermission,
+                    onPressed: contactsState.isLoading
+                        ? null
+                        : () => contactsNotifier.checkPermission(),
                     icon: const Icon(Icons.security),
                     label: const Text('Check Permission'),
                   ),
@@ -40,7 +45,9 @@ class _ContactsDemoState extends State<ContactsDemo> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: _requestPermission,
+                    onPressed: contactsState.isLoading
+                        ? null
+                        : () => contactsNotifier.requestPermission(),
                     icon: const Icon(Icons.request_page),
                     label: const Text('Request Permission'),
                   ),
@@ -49,15 +56,19 @@ class _ContactsDemoState extends State<ContactsDemo> {
             ),
             const SizedBox(height: 8),
             ElevatedButton.icon(
-              onPressed: _isLoading ? null : _getAllContacts,
-              icon: _isLoading
+              onPressed: contactsState.isLoading
+                  ? null
+                  : () => contactsNotifier.getAllContacts(),
+              icon: contactsState.isLoading
                   ? const SizedBox(
                       width: 16,
                       height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.contacts),
-              label: Text(_isLoading ? 'Loading...' : 'Get All Contacts'),
+              label: Text(
+                contactsState.isLoading ? 'Loading...' : 'Get All Contacts',
+              ),
             ),
             const SizedBox(height: 20),
             Text('Result:', style: Theme.of(context).textTheme.titleMedium),
@@ -69,22 +80,24 @@ class _ContactsDemoState extends State<ContactsDemo> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                _result.isEmpty ? 'No result yet' : _result,
+                contactsState.result.isEmpty
+                    ? 'No result yet'
+                    : contactsState.result,
                 style: const TextStyle(fontFamily: 'monospace'),
               ),
             ),
             const SizedBox(height: 20),
-            if (_contactsList.isNotEmpty) ...[
+            if (contactsState.contactsList.isNotEmpty) ...[
               Text(
-                'Contacts (${_contactsList.length}):',
+                'Contacts (${contactsState.contactsList.length}):',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
               Expanded(
                 child: ListView.builder(
-                  itemCount: _contactsList.length,
+                  itemCount: contactsState.contactsList.length,
                   itemBuilder: (context, index) {
-                    final contact = _contactsList[index];
+                    final contact = contactsState.contactsList[index];
                     return Card(
                       child: ListTile(
                         leading: CircleAvatar(
@@ -110,56 +123,5 @@ class _ContactsDemoState extends State<ContactsDemo> {
         ),
       ),
     );
-  }
-
-  Future<void> _checkPermission() async {
-    try {
-      final hasPermission = await _contacts.hasContactsPermission();
-      setState(() {
-        _result = hasPermission
-            ? 'Contacts permission is granted'
-            : 'Contacts permission is not granted';
-      });
-    } on PlatformException catch (e) {
-      setState(() {
-        _result = 'Failed to check permission: ${e.message}';
-      });
-    }
-  }
-
-  Future<void> _requestPermission() async {
-    try {
-      final granted = await _contacts.requestContactsPermission();
-      setState(() {
-        _result = granted
-            ? 'Contacts permission granted'
-            : 'Contacts permission denied';
-      });
-    } on PlatformException catch (e) {
-      setState(() {
-        _result = 'Failed to request permission: ${e.message}';
-      });
-    }
-  }
-
-  Future<void> _getAllContacts() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final contacts = await _contacts.getAllContacts();
-      setState(() {
-        _contactsList = contacts;
-        _result = 'Retrieved ${contacts.length} contacts successfully';
-        _isLoading = false;
-      });
-    } on PlatformException catch (e) {
-      setState(() {
-        _result = 'Failed to get contacts: ${e.message}';
-        _contactsList = [];
-        _isLoading = false;
-      });
-    }
   }
 }
